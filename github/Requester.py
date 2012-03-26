@@ -7,8 +7,10 @@ class UnknownGithubObject( Exception ):
     pass
 
 class Requester:
-    def __init__( self, login, password ):
-        self.__authorizationHeader = "Basic " + base64.b64encode( login + ":" + password ).replace( '\n', '' )
+    def __init__( self, login=None, password=None ):
+        if login is not None and password is not None:
+            self.__authorizationHeader = "Basic " + base64.b64encode(
+                login + ":" + password ).replace( '\n', '' )
 
     def dataRequest( self, verb, url, parameters, input ):
         if parameters is None:
@@ -47,11 +49,14 @@ class Requester:
         assert verb in [ "HEAD", "GET", "POST", "PATCH", "PUT", "DELETE" ]
 
         cnx = httplib.HTTPSConnection( "api.github.com", strict = True )
+        params = {}
+        if hasattr(self, '__authorizationHeader'):
+            params.update({ "Authorization" : self.__authorizationHeader })
         cnx.request(
             verb,
             self.__completeUrl( url, parameters ),
             json.dumps( input ),
-            { "Authorization" : self.__authorizationHeader }
+            params
         )
         response = cnx.getresponse()
 
@@ -61,7 +66,7 @@ class Requester:
 
         cnx.close()
 
-        # print verb, url, parameters, input, "==>", status, str( headers )[ :30 ], str( output )[ :30 ]
+        print verb, url, parameters, input, "==>", status, str( headers )[ :30 ], str( output )[ :30 ]
         return status, headers, output
 
     def __completeUrl( self, url, parameters ):

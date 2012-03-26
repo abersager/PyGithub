@@ -2,8 +2,8 @@ from Requester import Requester
 from GithubObjects import *
 
 class Github:
-    def __init__( self, login, password ):
-        self.__requester = Requester( login, password )
+    def __init__( self, login=None, password=None ):
+        self.__requester = Requester( login=login, password=password )
 
     def _dataRequest( self, verb, url, parameters, data ):
         return self.__requester.dataRequest( verb, url, parameters, data )
